@@ -248,61 +248,10 @@ class BevMap:
 
     def do_bev_projection(self):
         """
-            将点云投影至鸟瞰图，需要的参数是点云ROI的范围(上下左右)，分辨率(或者投影后图像的尺寸)，高度(即z轴)截取的范围
+            将点云投影至鸟瞰图，需要的参数是点云ROI的范围(上下左右)，分辨率(或者投影后图像的尺寸)，高度(即z轴)截取的范围，
+            其实上面那个扩维的函数中，已经实现了bev投影，后续试着把两个函数合并。
         """
-        # get depth of all points
-        depth = np.linalg.norm(self.points, 2, axis=1)
-        # get scan components
-        scan_x = self.points[:, 0]
-        scan_y = self.points[:, 1]
-        scan_z = self.points[:, 2]
-        # 获得区域内的点，注意俯视图中点云的坐标轴，x轴向前，y轴向左
-        x_filt = np.logical_and(scan_x > self.xrange[0], scan_x < self.xrange[1])
-        y_filt = np.logical_and(scan_y > self.yrange[0], scan_y < self.yrange[1])
-        filter = np.logical_and(x_filt, y_filt)
-        indices = np.argwhere(filter).flatten()
-        scan_x = scan_x[indices]
-        scan_y = scan_y[indices]
-        scan_z = scan_z[indices]
-        # 注意，俯视图中点云的x轴向前，与图像的y轴是相反的，点云的y轴向左，与图像的x轴是相反的
-        proj_x = (-scan_y / self.res).astype(np.int32)
-        proj_y = (-scan_x / self.res).astype(np.int32)
-        # 调整坐标原点，点云默认的原点在中心，而图像的原点默认在左上角
-        proj_x -= int(np.floor(self.yrange[0]) / self.res)
-        proj_y += int(np.ceil(self.xrange[1] / self.res))
-        self.proj_x = np.copy(proj_x)
-        self.proj_y = np.copy(proj_y)
-        # print(proj_x.min(), proj_x.max(), proj_y.min(), proj_y.max())
-
-        # 把像素值归一化到(0, 255)
-        # z_value = ((z_value - self.zrange[0]) / float(self.zrange[1] - self.zrange[0]) * 255).astype(np.int32)
-
-        # copy of depth in original order
-        # self.unproj_range = np.copy(depth)
-
-        # order in decreasing depth
-        # indices = np.arange(depth.shape[0])
-        # order = np.argsort(depth)[::-1]
-        # depth = depth[order]
-        # indices = indices[order]
-        # points = self.points[order]
-        # z_value = scan_z[order]
-        # remission = self.remissions[order]
-        # proj_y = proj_y[order]
-        # proj_x = proj_x[order]
-
-        # 填充z坐标，这里的z坐标也可以做一下归一化操作
-        # TODO:论文中貌似填充的是z轴的最大值，我觉得不妥，我改成了填充一个高度范围内的值，类似于点云的水平切片
-        # z_value = np.clip(a=scan_z, a_min=self.zrange[0], a_max=self.zrange[1])
-
-        # assing to images
-        # 暂时按照LaserScan把各个图都赋值，具体来说depth和z_value是肯定用到的，其他不知道
-        # self.proj_bev[proj_y, proj_x] = depth  # bev
-        # self.proj_xyz[proj_y, proj_x] = self.points
-        # self.proj_height[proj_y, proj_x] = z_value
-        # self.proj_remission[proj_y, proj_x] = self.remission
-        # self.proj_idx[proj_y, proj_x] = indices
-        # self.proj_mask = (self.proj_idx > 0).astype(np.int32)
+        pass
 
 
 if __name__ == "__main__":
